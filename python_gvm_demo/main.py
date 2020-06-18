@@ -16,6 +16,51 @@ from table_models import TaskTableModel
 
 class Ui_MainForm(object):
 
+    def load_tasks_ui(self):
+        print("Tasks load")
+        _translate = QtCore.QCoreApplication.translate
+        self.caption_label = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
+        self.caption_label.setFont(font)
+        self.caption_label.setStyleSheet("color: white")
+        self.caption_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.caption_label.setObjectName("caption_label")
+        self.caption_label.setText(_translate("MainForm", "Aufgaben: "))
+
+        # Before adding the new one delete the old
+        for i in reversed(range(self.verticalLayout.count())):
+            self.verticalLayout.itemAt(i).widget().deleteLater()
+
+        self.verticalLayout.addWidget(self.caption_label)
+
+        table_model = TaskTableModel(self.gmp)
+        #table_model.setHorizontalHeaderLabels(["Name", "Status", "Berichte", "Letzter Bericht", "Schweregrad"])
+        self.tasks = QtWidgets.QTableView(self.centralwidget)
+
+        self.tasks.setObjectName("tasks")
+        self.tasks.setModel(table_model)
+        header = self.tasks.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Fixed)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Fixed)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Fixed)
+        header.setStyleSheet("background-color: rgb(7,121,193); color: white")
+        self.verticalLayout.addWidget(self.tasks)
+
+
+    def load_reports_ui(self):
+        print("reports work in progress")
+    
+    def load_results_ui(self):
+        print("results work in progress")
+
+    def reload(self):
+        print("reload clicked")
+    
     def setupUi(self, MainForm):
         MainForm.setObjectName("MainForm")
         MainForm.resize(1024, 598)
@@ -40,6 +85,9 @@ class Ui_MainForm(object):
         self.logo_label.setObjectName("logo_label")
         self.verticalLayout_3.addWidget(self.logo_label)
         self.tasks_button = QtWidgets.QPushButton(self.verticalFrame)
+
+        self.tasks_button.clicked.connect(lambda: self.load_tasks_ui())
+
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -59,6 +107,9 @@ class Ui_MainForm(object):
         self.tasks_button.setObjectName("tasks_button")
         self.verticalLayout_3.addWidget(self.tasks_button)
         self.results_button = QtWidgets.QPushButton(self.verticalFrame)
+
+        self.results_button.clicked.connect(lambda: self.load_results_ui())
+
         self.results_button.setMinimumSize(QtCore.QSize(200, 30))
         self.results_button.setMaximumSize(QtCore.QSize(200, 30))
         font = QtGui.QFont()
@@ -73,6 +124,9 @@ class Ui_MainForm(object):
         self.results_button.setObjectName("results_button")
         self.verticalLayout_3.addWidget(self.results_button)
         self.reports_button = QtWidgets.QPushButton(self.verticalFrame)
+
+        self.reports_button.clicked.connect(lambda: self.load_reports_ui())
+
         self.reports_button.setMinimumSize(QtCore.QSize(200, 30))
         self.reports_button.setMaximumSize(QtCore.QSize(200, 30))
         font = QtGui.QFont()
@@ -87,6 +141,9 @@ class Ui_MainForm(object):
         self.reports_button.setObjectName("reports_button")
         self.verticalLayout_3.addWidget(self.reports_button, 0, QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.reload_button = QtWidgets.QPushButton(self.verticalFrame)
+
+        self.reload_button.clicked.connect(lambda: self.reload())
+
         font = QtGui.QFont()
         font.setPointSize(16)
         font.setBold(True)
@@ -133,42 +190,9 @@ class Ui_MainForm(object):
             ui = Ui_MainForm()
             ui.gmp = gmp
             ui.setupUi(main_window)
+            
             main_window.show()
             ui.load_tasks_ui()
             main_window.show()
 
-    def load_tasks_ui(self):
-        _translate = QtCore.QCoreApplication.translate
-        self.caption_label = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(16)
-        font.setBold(True)
-        font.setWeight(75)
-        self.caption_label.setFont(font)
-        self.caption_label.setStyleSheet("color: white")
-        self.caption_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.caption_label.setObjectName("caption_label")
-        self.caption_label.setText(_translate("MainForm", "Aufgaben: "))
-        self.verticalLayout.addWidget(self.caption_label)
-
-        table_model = TaskTableModel(self.gmp)
-        #table_model.setHorizontalHeaderLabels(["Name", "Status", "Berichte", "Letzter Bericht", "Schweregrad"])
-        self.tasks = QtWidgets.QTableView(self.centralwidget)
-
-        self.tasks.setObjectName("tasks")
-        self.tasks.setModel(table_model)
-        header = self.tasks.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Fixed)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Fixed)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Fixed)
-        header.setStyleSheet("background-color: rgb(7,121,193); color: white")
-        self.verticalLayout.addWidget(self.tasks)
-
-
-    def load_reports_ui(gmp, main_window, ui):
-        print("work in progress")
     
-    def load_results_ui(gmp, main_window, ui):
-        print("work in progress")

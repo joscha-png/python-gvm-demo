@@ -20,12 +20,15 @@ class TaskTableModel(QAbstractTableModel):
             self.names.append(task.name)
             self.states.append(task.status)
             self.reports.append(task.report_count.current)
-            if task.last_report.timestamp is not None:
-                self.last_reports.append(task.last_report.timestamp.strftime("%a, %d. %B %Y %H:%M %Z"))
+            if task.last_report is not None:
+                if task.last_report.timestamp is not None:
+                    self.last_reports.append(task.last_report.timestamp.strftime("%a, %d. %B %Y %H:%M %Z"))
+                else:
+                    self.last_reports.append("")
+                self.severities.append(task.last_report.severity.full)
             else:
                 self.last_reports.append("")
-            self.severities.append(task.last_report.severity.full)
-
+                self.severities.append("")
         self.column_count = 5
         self.row_count = len(self.names)
 
