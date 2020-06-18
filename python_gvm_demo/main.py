@@ -1,5 +1,3 @@
-from login import Ui_LoginForm
-from start import Ui_StartForm
 import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -13,6 +11,7 @@ from PyQt5.Qt import QStandardItemModel
 from gvm.connections import SSHConnection
 from gvm.protocols.gmp import Gmp
 from gvm.transforms import ObjectTransform
+from table_models import TaskTableModel
 
 
 class Ui_MainForm(object):
@@ -103,31 +102,10 @@ class Ui_MainForm(object):
         self.horizontalLayout.addLayout(self.verticalLayout_2)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
-        self.caption_label = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(16)
-        font.setBold(True)
-        font.setWeight(75)
-        self.caption_label.setFont(font)
-        self.caption_label.setStyleSheet("color: white")
-        self.caption_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.caption_label.setObjectName("caption_label")
-        self.verticalLayout.addWidget(self.caption_label)
         
-        table_model = QStandardItemModel()
-        table_model.setHorizontalHeaderLabels(["Name", "Status", "Berichte", "Letzter Bericht", "Schweregrad"])
-        self.tasks = QtWidgets.QTableView(self.centralwidget)
-        self.tasks.setObjectName("tasks")
-        self.tasks.setModel(table_model)
-        header = self.tasks.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
-        header.setStyleSheet("background-color: rgb(7,121,193); color: white")
+        
+        
 
-        self.verticalLayout.addWidget(self.tasks)
         self.horizontalLayout.addLayout(self.verticalLayout)
         MainForm.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainForm)
@@ -148,25 +126,49 @@ class Ui_MainForm(object):
         self.results_button.setText(_translate("MainForm", "Results"))
         self.reports_button.setText(_translate("MainForm", "Reports"))
         self.reload_button.setText(_translate("MainForm", "Reload"))
+
+    @staticmethod
+    def load_startup_ui(gmp, main_window):
+        if gmp:
+            ui = Ui_MainForm()
+            ui.gmp = gmp
+            ui.setupUi(main_window)
+            main_window.show()
+            ui.load_tasks_ui()
+            main_window.show()
+
+    def load_tasks_ui(self):
+        _translate = QtCore.QCoreApplication.translate
+        self.caption_label = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
+        self.caption_label.setFont(font)
+        self.caption_label.setStyleSheet("color: white")
+        self.caption_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.caption_label.setObjectName("caption_label")
         self.caption_label.setText(_translate("MainForm", "Aufgaben: "))
+        self.verticalLayout.addWidget(self.caption_label)
 
-"""
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    LoginForm = QtWidgets.QMainWindow()
-    ui = Ui_LoginForm()
-    ui.setupUi(LoginForm)
-    LoginForm.show()
-    sys.exit(app.exec_())
+        table_model = TaskTableModel(self.gmp)
+        #table_model.setHorizontalHeaderLabels(["Name", "Status", "Berichte", "Letzter Bericht", "Schweregrad"])
+        self.tasks = QtWidgets.QTableView(self.centralwidget)
+
+        self.tasks.setObjectName("tasks")
+        self.tasks.setModel(table_model)
+        header = self.tasks.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Fixed)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Fixed)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Fixed)
+        header.setStyleSheet("background-color: rgb(7,121,193); color: white")
+        self.verticalLayout.addWidget(self.tasks)
 
 
-"""
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainForm = QtWidgets.QMainWindow()
-    ui = Ui_MainForm()
-    ui.setupUi(MainForm)
-    MainForm.show()
-    sys.exit(app.exec_())
+    def load_reports_ui(gmp, main_window, ui):
+        print("work in progress")
+    
+    def load_results_ui(gmp, main_window, ui):
+        print("work in progress")

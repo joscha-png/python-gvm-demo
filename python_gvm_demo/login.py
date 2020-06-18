@@ -14,12 +14,19 @@ from socket import gaierror
 from gvm.connections import SSHConnection
 from gvm.transforms import ObjectTransform
 from gvm.protocols.gmp import Gmp
+from gvm.errors import GvmResponseError
+from main import Ui_MainForm
 
 class LoginEvent(QObject):
-    login_event = pyqtSignal(Gmp)
+    login_event = pyqtSignal(object, object)
 
 class Ui_LoginForm(object):
     def setupUi(self, LoginForm):
+        
+        self.signal = LoginEvent()
+        self.signal.login_event.connect(Ui_MainForm.load_startup_ui)
+        self.window = LoginForm
+        
         LoginForm.setObjectName("LoginForm")
         LoginForm.resize(501, 597)
         LoginForm.setStyleSheet("background-color: rgb(32, 32, 32)")
@@ -161,9 +168,12 @@ class Ui_LoginForm(object):
                 with Gmp(
                     connection=connection, 
                     transform=ObjectTransform()) as gmp:
-                    response = gmp.authenticate(username=self.username_input.text(), password=self.password_input.text())
-                    print(gmp)
-
+                    try:
+                        response = gmp.authenticate(username=self.username_input.text(), password=self.password_input.text())
+                        print(response)
+                        self.signal.login_event.emit(gmp, self.window)
+                    except GvmResponseError:
+                        QMessageBox.about(QMainWindow(), "Error", "Wrong username or password.")        
 
             except gaierror:
                 QMessageBox.about(QMainWindow(), "Error", "Wrong Hostname")
