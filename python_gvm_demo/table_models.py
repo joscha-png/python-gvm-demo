@@ -13,6 +13,7 @@ class TaskTableModel(QAbstractTableModel):
         self.reports = []
         self.last_reports = []
         self.severities = []
+        self.trends = []
 
         response = gmp.get_tasks()
 
@@ -29,7 +30,20 @@ class TaskTableModel(QAbstractTableModel):
             else:
                 self.last_reports.append("")
                 self.severities.append("")
-        self.column_count = 5
+
+            if task.trend is not None:
+                if task.trend == "same":
+                    self.trends.append("➙")
+                elif task.trend == "more":
+                    self.trends.append("➚")
+                elif task.trend == "less":
+                    self.trends.append("➘")
+                else:
+                    self.trends.append(task.trend)
+            else:
+                self.trends.append(task.trend)
+
+        self.column_count = 6
         self.row_count = len(self.names)
 
     def rowCount(self, parent=QModelIndex()):
@@ -42,7 +56,7 @@ class TaskTableModel(QAbstractTableModel):
         if role != Qt.DisplayRole:
             return None
         if orientation == Qt.Horizontal:
-            return ("Name", "Status", "Berichte","Letzter Bericht", "Schweregrad")[section]
+            return ("Name", "Status", "Berichte","Letzter Bericht", "Schweregrad","Trend")[section]
         else:
             return "{}".format(section)
 
@@ -61,6 +75,8 @@ class TaskTableModel(QAbstractTableModel):
                 return self.last_reports[row]
             elif column == 4:
                 return self.severities[row]
+            elif column == 5:
+                return self.trends[row]
         elif role == Qt.BackgroundRole:
             if row%2 == 1:
                 return QColor(qRgb(70,70,70))

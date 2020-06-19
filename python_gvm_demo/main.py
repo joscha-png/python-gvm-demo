@@ -38,18 +38,18 @@ class Ui_MainForm(object):
 
         table_model = TaskTableModel(self.gmp)
         #table_model.setHorizontalHeaderLabels(["Name", "Status", "Berichte", "Letzter Bericht", "Schweregrad"])
-        self.tasks = QtWidgets.QTableView(self.centralwidget)
+        self.table = QtWidgets.QTableView(self.centralwidget)
 
-        self.tasks.setObjectName("tasks")
-        self.tasks.setModel(table_model)
-        header = self.tasks.horizontalHeader()
+        self.table.setObjectName("tasks")
+        self.table.setModel(table_model)
+        header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Fixed)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Fixed)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.Fixed)
         header.setStyleSheet("background-color: rgb(7,121,193); color: white")
-        self.verticalLayout.addWidget(self.tasks)
+        self.verticalLayout.addWidget(self.table)
 
 
     def load_reports_ui(self):
