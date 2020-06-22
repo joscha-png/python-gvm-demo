@@ -7,7 +7,7 @@ authors = ["joscha"]
 [tool.poetry.dependencies]
 python = "^3.8"
 pyqt5 = "^5.15.0"
-python-gvm = {path = "../../../python-gvm"}
+python-gvm = {git = "https://github.com/joscha-png/python-gvm"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

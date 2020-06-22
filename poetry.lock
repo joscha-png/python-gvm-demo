@@ -231,11 +231,10 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 [[package]]
 category = "main"
 description = ""
-develop = true
 name = "python-gvm"
 optional = false
 python-versions = "^3.5.2"
-version = "1.6.0.dev1"
+version = "1.6.0"
 
 [package.dependencies]
 defusedxml = "^0.6.0"
@@ -243,10 +242,9 @@ lxml = "^4.5.0"
 paramiko = "^2.7.1"
 
 [package.source]
-reference = ""
-type = "directory"
-url = "../../../python-gvm"
-
+reference = "968906d8da0599e6f319af19d403b942b8befa6d"
+type = "git"
+url = "https://github.com/joscha-png/python-gvm"
 [[package]]
 category = "main"
 description = "Python 2 and 3 compatibility utilities"
@@ -264,7 +262,7 @@ python-versions = "*"
 version = "0.2.4"
 
 [metadata]
-content-hash = "71005c027153dd90d24c7c17e703304942d4a3159c00e419bd5ce5d7ec627464"
+content-hash = "584fe4431407f89290c2fd46b2c806713b4120341e483fe0bbb973b552c539fb"
 python-versions = "^3.8"
 
 [metadata.files]
