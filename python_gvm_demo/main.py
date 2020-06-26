@@ -12,6 +12,8 @@ from gvm.connections import SSHConnection
 from gvm.protocols.gmp import Gmp
 from gvm.transforms import ObjectTransform
 
+from gvm.errors import GvmServerError
+
 
 class Ui_MainForm(QWidget):
 
@@ -23,16 +25,19 @@ class Ui_MainForm(QWidget):
 
         index = self.table.indexAt(button.pos())
         if index.isValid():
-            print(index.row(),index.column())
+            #print(index.row(),index.column())
 
             task = self.tasks[index.row()]
-            response = self.gmp.start_task(task.uuid)
-            print(response)
+            try:
+                response = self.gmp.start_task(task.uuid)
+            except GvmServerError:
+                QMessageBox.about(QMainWindow(), "Error", "Can't start this task.")
+            #print(response)
 
-            self.load_tasks_ui()
+            #self.load_tasks_ui()
 
     def load_tasks_ui(self):
-        print("Tasks load")
+        #print("Tasks load")
         _translate = QtCore.QCoreApplication.translate
         self.caption_label = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
@@ -54,7 +59,7 @@ class Ui_MainForm(QWidget):
         self.table = QtWidgets.QTableWidget()
 
         # Get the data
-        response = self.gmp.get_tasks()
+        response = self.gmp.get_tasks(filter="rows=-1")
 
 
         self.table.setColumnCount(7)
@@ -65,6 +70,9 @@ class Ui_MainForm(QWidget):
         for index in range(len(response.tasks)):
             item0 = QTableWidgetItem(self.tasks[index].name)
             item1 = QTableWidgetItem(self.tasks[index].status)
+
+            if self.tasks[index].target.uuid == "":
+                item1 = QTableWidgetItem("Container")
 
             if self.tasks[index].status == "Running":
                 item1 = QTableWidgetItem(str(self.tasks[index].progress)+"%")
@@ -79,6 +87,8 @@ class Ui_MainForm(QWidget):
                 else:
                     report = ""
                 severity = str(self.tasks[index].last_report.severity.full)
+                if severity == "-99.0":
+                    severity = "N/A"
             else:
                 report = ""
                 severity = ""
