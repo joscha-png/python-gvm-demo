@@ -11,10 +11,25 @@ from PyQt5.Qt import QStandardItemModel
 from gvm.connections import SSHConnection
 from gvm.protocols.gmp import Gmp
 from gvm.transforms import ObjectTransform
-from table_models import TaskTableModel
 
 
-class Ui_MainForm(object):
+class Ui_MainForm(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+    def handle_start_button_clicked(self):
+        button = self.sender()
+
+        index = self.table.indexAt(button.pos())
+        if index.isValid():
+            print(index.row(),index.column())
+
+            task = self.tasks[index.row()]
+            response = self.gmp.start_task(task.uuid)
+            print(response)
+
+            self.load_tasks_ui()
 
     def load_tasks_ui(self):
         print("Tasks load")
@@ -36,19 +51,109 @@ class Ui_MainForm(object):
 
         self.verticalLayout.addWidget(self.caption_label)
 
-        table_model = TaskTableModel(self.gmp)
-        #table_model.setHorizontalHeaderLabels(["Name", "Status", "Berichte", "Letzter Bericht", "Schweregrad"])
-        self.table = QtWidgets.QTableView(self.centralwidget)
+        self.table = QtWidgets.QTableWidget()
 
-        self.table.setObjectName("tasks")
-        self.table.setModel(table_model)
+        # Get the data
+        response = self.gmp.get_tasks()
+
+
+        self.table.setColumnCount(7)
+        self.table.setRowCount(len(response.tasks))
+
+        self.tasks = response.tasks
+
+        for index in range(len(response.tasks)):
+            item0 = QTableWidgetItem(self.tasks[index].name)
+            item1 = QTableWidgetItem(self.tasks[index].status)
+
+            if self.tasks[index].status == "Running":
+                item1 = QTableWidgetItem(str(self.tasks[index].progress)+"%")
+
+            item2 = QTableWidgetItem(str(self.tasks[index].report_count.current))
+            
+            report = ""
+            severity = ""
+            if self.tasks[index].last_report is not None:
+                if self.tasks[index].last_report.timestamp is not None:
+                    report = self.tasks[index].last_report.timestamp.strftime("%a, %d. %B %Y %H:%M %Z")
+                else:
+                    report = ""
+                severity = str(self.tasks[index].last_report.severity.full)
+            else:
+                report = ""
+                severity = ""
+
+            item3 = QTableWidgetItem(report)
+            item4 = QTableWidgetItem(severity)
+
+            trend = ""
+            if self.tasks[index].trend is not None:
+                if self.tasks[index].trend == "same":
+                    trend = "➙"
+                elif self.tasks[index].trend == "more":
+                    trend = "➚"
+                elif self.tasks[index].trend == "less":
+                    trend = "➘"
+                elif self.tasks[index].trend == "down":
+                    trend = "↓"
+                else:
+                    trend = self.tasks[index].trend
+            
+            item5 = QTableWidgetItem(trend)
+
+            # Change alignment
+            item0.setTextAlignment(Qt.AlignCenter)
+            item1.setTextAlignment(Qt.AlignCenter)
+            item2.setTextAlignment(Qt.AlignCenter)
+            item3.setTextAlignment(Qt.AlignCenter)
+            item4.setTextAlignment(Qt.AlignCenter)
+            item5.setTextAlignment(Qt.AlignCenter)
+
+            item0.setForeground(QColor(Qt.white))
+            item1.setForeground(QColor(Qt.white))
+            item2.setForeground(QColor(Qt.white))
+            item3.setForeground(QColor(Qt.white))
+            item4.setForeground(QColor(Qt.white))
+            item5.setForeground(QColor(Qt.white))
+
+            if index % 2 == 1:
+                item0.setBackground(QColor(qRgb(70,70,70)))
+                item1.setBackground(QColor(qRgb(70,70,70)))
+                item2.setBackground(QColor(qRgb(70,70,70)))
+                item3.setBackground(QColor(qRgb(70,70,70)))
+                item4.setBackground(QColor(qRgb(70,70,70)))
+                item5.setBackground(QColor(qRgb(70,70,70)))
+            else:
+                item0.setBackground(QColor(qRgb(50,50,50)))
+                item1.setBackground(QColor(qRgb(50,50,50)))
+                item2.setBackground(QColor(qRgb(50,50,50)))
+                item3.setBackground(QColor(qRgb(50,50,50)))
+                item4.setBackground(QColor(qRgb(50,50,50)))
+                item5.setBackground(QColor(qRgb(50,50,50)))
+
+            self.table.setItem(index,0,item0)
+            self.table.setItem(index,1,item1)
+            self.table.setItem(index,2,item2)
+            self.table.setItem(index,3,item3)
+            self.table.setItem(index,4,item4)
+            self.table.setItem(index,5,item5)
+
+            button = QtWidgets.QPushButton("►")
+            button.setStyleSheet("color: white")
+            button.clicked.connect(self.handle_start_button_clicked)
+            self.table.setCellWidget(index,6, button)
+
+
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Fixed)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Fixed)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.Fixed)
+        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Fixed)
         header.setStyleSheet("background-color: rgb(7,121,193); color: white")
+        self.table.setHorizontalHeaderLabels(["Name", "Status", "Berichte", "Letzter Bericht", "Schweregrad","Trend","Start Task"])
+
         self.verticalLayout.addWidget(self.table)
 
 
@@ -63,8 +168,10 @@ class Ui_MainForm(object):
     
     def setupUi(self, MainForm):
         MainForm.setObjectName("MainForm")
-        MainForm.resize(1024, 598)
+        MainForm.resize(1224, 598)
         MainForm.setStyleSheet("background-color: rgb(32, 32, 32)")
+        self.window = MainForm
+
         self.centralwidget = QtWidgets.QWidget(MainForm)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -174,7 +281,11 @@ class Ui_MainForm(object):
         MainForm.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainForm)
+        self.window.setWindowTitle("Main")
         QtCore.QMetaObject.connectSlotsByName(MainForm)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.load_tasks_ui)
+        self.timer.start(5000)
 
     def retranslateUi(self, MainForm):
         _translate = QtCore.QCoreApplication.translate
@@ -183,6 +294,7 @@ class Ui_MainForm(object):
         self.results_button.setText(_translate("MainForm", "Results"))
         self.reports_button.setText(_translate("MainForm", "Reports"))
         self.reload_button.setText(_translate("MainForm", "Reload"))
+
 
     @staticmethod
     def load_startup_ui(gmp, main_window):
@@ -193,6 +305,7 @@ class Ui_MainForm(object):
             
             main_window.show()
             ui.load_tasks_ui()
+            
             main_window.show()
 
     

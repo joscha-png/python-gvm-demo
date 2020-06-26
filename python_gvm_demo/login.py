@@ -144,6 +144,7 @@ class Ui_LoginForm(object):
         LoginForm.setStatusBar(self.statusbar)
 
         self.retranslateUi(LoginForm)
+        self.window.setWindowTitle("Login")
         QtCore.QMetaObject.connectSlotsByName(LoginForm)
 
     def retranslateUi(self, LoginForm):
