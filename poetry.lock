@@ -245,6 +245,7 @@ paramiko = "^2.7.1"
 reference = "0d3e7e8cd8c66206dbd296aeac7ff0a7f396543e"
 type = "git"
 url = "https://github.com/joscha-png/python-gvm"
+
 [[package]]
 category = "main"
 description = "Python 2 and 3 compatibility utilities"
@@ -262,7 +263,7 @@ python-versions = "*"
 version = "0.2.5"
 
 [metadata]
-content-hash = "584fe4431407f89290c2fd46b2c806713b4120341e483fe0bbb973b552c539fb"
+content-hash = "a76de420f2c74c0af026854e7ecb326955abe1a62782612531ba9676795acb34"
 python-versions = "^3.8"
 
 [metadata.files]

@@ -8,6 +8,7 @@ authors = ["joscha"]
 python = "^3.8"
 pyqt5 = "^5.15.0"
 python-gvm = {git = "https://github.com/joscha-png/python-gvm"}
+lxml = "^4.5.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
