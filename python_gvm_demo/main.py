@@ -48,6 +48,7 @@ class Ui_MainForm(QWidget):
 
     def handle_tasks_button_clicked(self):
         self.timer.stop()
+        self.timer = QTimer()
         self.timer.timeout.connect(self.load_tasks_ui)
         self.timer.start(5000)
 
@@ -55,13 +56,14 @@ class Ui_MainForm(QWidget):
 
     def handle_reports_button_clicked(self):
         self.timer.stop()
+        self.timer = QTimer()
         self.timer.timeout.connect(self.load_reports_ui)
-        self.timer.start(5000)
+        self.timer.start(50000)
 
         self.load_reports_ui()
 
     def load_tasks_ui(self):
-        # print("Tasks load")
+        print("Tasks load")
         _translate = QtCore.QCoreApplication.translate
         self.caption_label = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
@@ -219,7 +221,7 @@ class Ui_MainForm(QWidget):
         self.caption_label.setStyleSheet("color: white")
         self.caption_label.setAlignment(QtCore.Qt.AlignCenter)
         self.caption_label.setObjectName("caption_label")
-        self.caption_label.setText(_translate("MainForm", "Aufgaben: "))
+        self.caption_label.setText(_translate("MainForm", "Berichte: "))
 
         # Before adding the new one delete the old
         for i in reversed(range(self.verticalLayout.count())):
@@ -230,21 +232,43 @@ class Ui_MainForm(QWidget):
         self.table = QtWidgets.QTableWidget()
 
         # Get the data
-        response = self.gmp.get_tasks(filter="rows=-1")
+        response = self.gmp.get_reports()  # filter="rows=-1"
 
         self.table.setColumnCount(9)
-        self.table.setRowCount(len(response.tasks))
+        self.table.setRowCount(len(response.reports))
 
-        self.tasks = response.tasks
+        self.reports = response.reports
 
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Fixed)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Fixed)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Fixed)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.Fixed)
         header.setSectionResizeMode(5, QtWidgets.QHeaderView.Fixed)
         header.setStyleSheet("background-color: rgb(7,121,193); color: white")
+
+        header_item_high = QtWidgets.QTableWidgetItem("Hoch")
+        header_item_high.setBackground(QtGui.QColor(200, 56, 20))
+
+        header_item_medium = QtWidgets.QTableWidgetItem("Mittel")
+        header_item_medium.setBackground(QtGui.QColor(240, 165, 25))
+
+        header_item_low = QtWidgets.QTableWidgetItem("Niedrig")
+        header_item_low.setBackground(QtGui.QColor(79, 145, 199))
+
+        header_item_log = QtWidgets.QTableWidgetItem("Log")
+        header_item_log.setBackground(QtGui.QColor(0, 0, 0))
+
+        header_item_false_positiv = QtWidgets.QTableWidgetItem("Falsch-Positiv")
+        header_item_false_positiv.setBackground(QtGui.QColor(0, 0, 0))
+
+        self.table.setHorizontalHeaderItem(4, header_item_high)
+        self.table.setHorizontalHeaderItem(5, header_item_medium)
+        self.table.setHorizontalHeaderItem(6, header_item_low)
+        self.table.setHorizontalHeaderItem(7, header_item_log)
+        self.table.setHorizontalHeaderItem(8, header_item_false_positiv)
+
         self.table.setHorizontalHeaderLabels(
             [
                 "Datum",
@@ -260,6 +284,96 @@ class Ui_MainForm(QWidget):
         )
 
         # Hier kommt die Logik rein
+        for index in range(len(response.reports)):
+            # items erstellen
+            item0 = QTableWidgetItem()
+            if self.reports[index].timestamp is not None:
+                date = self.reports[index].timestamp.strftime("%a, %d. %B %Y %H:%M %Z")
+                item0 = QTableWidgetItem(date)
+
+            item1 = QTableWidgetItem(self.reports[index].task.status)
+            if self.reports[index].task.target.uuid == "":
+                item1 = QTableWidgetItem("Container")
+
+            item2 = QTableWidgetItem(self.reports[index].task.name)
+
+            severity = str(self.reports[index].severity.full)
+            if severity == "-99.0":
+                severity = "N/A"
+
+            item3 = QTableWidgetItem(severity)
+
+            """
+            severity mapping:
+                hole    -> hoch
+                warning -> mittel
+                info    -> niedrig
+                log     -> log
+            """
+            item4 = QTableWidgetItem(str(self.reports[index].result_count.hole.full))
+            item5 = QTableWidgetItem(str(self.reports[index].result_count.warning.full))
+            item6 = QTableWidgetItem(str(self.reports[index].result_count.info.full))
+            item7 = QTableWidgetItem(str(self.reports[index].result_count.log.full))
+            item8 = None
+            if self.reports[index].result_count.false_positiv.full is None:
+                item8 = QTableWidgetItem("0")
+            else:
+                item8 = QTableWidgetItem(
+                    str(self.reports[index].result_count.false_positiv.full)
+                )
+
+            # Items anpassen
+            item0.setTextAlignment(Qt.AlignCenter)
+            item1.setTextAlignment(Qt.AlignCenter)
+            item2.setTextAlignment(Qt.AlignCenter)
+            item3.setTextAlignment(Qt.AlignCenter)
+            item4.setTextAlignment(Qt.AlignCenter)
+            item5.setTextAlignment(Qt.AlignCenter)
+            item6.setTextAlignment(Qt.AlignCenter)
+            item7.setTextAlignment(Qt.AlignCenter)
+            item8.setTextAlignment(Qt.AlignCenter)
+
+            item0.setForeground(QColor(Qt.white))
+            item1.setForeground(QColor(Qt.white))
+            item2.setForeground(QColor(Qt.white))
+            item3.setForeground(QColor(Qt.white))
+            item4.setForeground(QColor(Qt.white))
+            item5.setForeground(QColor(Qt.white))
+            item6.setForeground(QColor(Qt.white))
+            item7.setForeground(QColor(Qt.white))
+            item8.setForeground(QColor(Qt.white))
+
+            if index % 2 == 1:
+                item0.setBackground(QColor(qRgb(70, 70, 70)))
+                item1.setBackground(QColor(qRgb(70, 70, 70)))
+                item2.setBackground(QColor(qRgb(70, 70, 70)))
+                item3.setBackground(QColor(qRgb(70, 70, 70)))
+                item4.setBackground(QColor(qRgb(70, 70, 70)))
+                item5.setBackground(QColor(qRgb(70, 70, 70)))
+                item6.setBackground(QColor(qRgb(70, 70, 70)))
+                item7.setBackground(QColor(qRgb(70, 70, 70)))
+                item8.setBackground(QColor(qRgb(70, 70, 70)))
+            else:
+                item0.setBackground(QColor(qRgb(50, 50, 50)))
+                item1.setBackground(QColor(qRgb(50, 50, 50)))
+                item2.setBackground(QColor(qRgb(50, 50, 50)))
+                item3.setBackground(QColor(qRgb(50, 50, 50)))
+                item4.setBackground(QColor(qRgb(50, 50, 50)))
+                item5.setBackground(QColor(qRgb(50, 50, 50)))
+                item6.setBackground(QColor(qRgb(50, 50, 50)))
+                item7.setBackground(QColor(qRgb(50, 50, 50)))
+                item8.setBackground(QColor(qRgb(50, 50, 50)))
+
+            # items in tabelle einsetzen
+            self.table.setItem(index, 0, item0)
+            self.table.setItem(index, 1, item1)
+            self.table.setItem(index, 2, item2)
+            self.table.setItem(index, 3, item3)
+            self.table.setItem(index, 4, item4)
+            self.table.setItem(index, 5, item5)
+            self.table.setItem(index, 6, item6)
+            self.table.setItem(index, 7, item7)
+            self.table.setItem(index, 8, item8)
 
         self.verticalLayout.addWidget(self.table)
 
