@@ -64,6 +64,10 @@ class Ui_MainForm(QWidget):
 
     def load_tasks_ui(self):
         print("Tasks load")
+
+        response = self.gmp.get_tasks(filter="rows=-1")
+        self.tasks = response.tasks
+
         _translate = QtCore.QCoreApplication.translate
         self.caption_label = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
@@ -74,7 +78,9 @@ class Ui_MainForm(QWidget):
         self.caption_label.setStyleSheet("color: white")
         self.caption_label.setAlignment(QtCore.Qt.AlignCenter)
         self.caption_label.setObjectName("caption_label")
-        self.caption_label.setText(_translate("MainForm", "Aufgaben: "))
+        self.caption_label.setText(
+            _translate("MainForm", "Aufgaben: " + str(len(self.tasks)))
+        )
 
         # Before adding the new one delete the old
         for i in reversed(range(self.verticalLayout.count())):
@@ -85,12 +91,9 @@ class Ui_MainForm(QWidget):
         self.table = QtWidgets.QTableWidget()
 
         # Get the data
-        response = self.gmp.get_tasks(filter="rows=-1")
 
         self.table.setColumnCount(8)
         self.table.setRowCount(len(response.tasks))
-
-        self.tasks = response.tasks
 
         for index in range(len(response.tasks)):
             item0 = QTableWidgetItem(self.tasks[index].name)
@@ -133,6 +136,8 @@ class Ui_MainForm(QWidget):
                     trend = "➘"
                 elif self.tasks[index].trend == "down":
                     trend = "↓"
+                elif self.tasks[index].trend == "up":
+                    trend = "↑"
                 else:
                     trend = self.tasks[index].trend
 
@@ -180,7 +185,7 @@ class Ui_MainForm(QWidget):
             button.clicked.connect(self.handle_start_button_clicked)
             self.table.setCellWidget(index, 6, button)
 
-            button = QtWidgets.QPushButton("■")
+            button = QtWidgets.QPushButton("▌▌")
             button.setStyleSheet("color: white")
             button.clicked.connect(self.handle_stop_button_clicked)
             self.table.setCellWidget(index, 7, button)
@@ -211,6 +216,10 @@ class Ui_MainForm(QWidget):
     def load_reports_ui(self):
         print("reports work in progress")
 
+        # Get the data
+        response = self.gmp.get_reports()  # filter="rows=-1"
+        self.reports = response.reports
+
         _translate = QtCore.QCoreApplication.translate
         self.caption_label = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
@@ -221,7 +230,9 @@ class Ui_MainForm(QWidget):
         self.caption_label.setStyleSheet("color: white")
         self.caption_label.setAlignment(QtCore.Qt.AlignCenter)
         self.caption_label.setObjectName("caption_label")
-        self.caption_label.setText(_translate("MainForm", "Berichte: "))
+        self.caption_label.setText(
+            _translate("MainForm", "Berichte: " + str(len(self.reports)))
+        )
 
         # Before adding the new one delete the old
         for i in reversed(range(self.verticalLayout.count())):
@@ -231,13 +242,8 @@ class Ui_MainForm(QWidget):
 
         self.table = QtWidgets.QTableWidget()
 
-        # Get the data
-        response = self.gmp.get_reports()  # filter="rows=-1"
-
         self.table.setColumnCount(9)
         self.table.setRowCount(len(response.reports))
-
-        self.reports = response.reports
 
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
