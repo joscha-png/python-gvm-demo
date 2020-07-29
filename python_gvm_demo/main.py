@@ -104,6 +104,10 @@ class Ui_MainForm(QWidget):
 
             if self.tasks[index].status == "Running":
                 item1 = QTableWidgetItem(str(self.tasks[index].progress) + "%")
+            elif self.tasks[index].status == "Done":
+                item1 = QTableWidgetItem("Fertig")
+            elif self.tasks[index].status == "Requested":
+                item1 = QTableWidgetItem("Angefragt")
 
             item2 = QTableWidgetItem(str(self.tasks[index].report_count.current))
 
@@ -505,9 +509,9 @@ class Ui_MainForm(QWidget):
     def retranslateUi(self, MainForm):
         _translate = QtCore.QCoreApplication.translate
         MainForm.setWindowTitle(_translate("MainForm", "MainWindow"))
-        self.tasks_button.setText(_translate("MainForm", "Tasks"))
-        self.results_button.setText(_translate("MainForm", "Results"))
-        self.reports_button.setText(_translate("MainForm", "Reports"))
+        self.tasks_button.setText(_translate("MainForm", "Aufgaben"))
+        self.results_button.setText(_translate("MainForm", "Ergebnisse"))
+        self.reports_button.setText(_translate("MainForm", "Berichte"))
 
     @staticmethod
     def load_startup_ui(gmp, main_window):
