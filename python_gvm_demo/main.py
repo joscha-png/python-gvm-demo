@@ -294,7 +294,7 @@ class Ui_MainForm(QWidget):
         )
 
         # Hier kommt die Logik rein
-        for index in range(len(response.reports)):
+        for index in reversed(range(len(response.reports))):
             # items erstellen
             item0 = QTableWidgetItem()
             if self.reports[index].timestamp is not None:
@@ -329,7 +329,7 @@ class Ui_MainForm(QWidget):
                 item8 = QTableWidgetItem("0")
             else:
                 item8 = QTableWidgetItem(
-                    str(self.reports[index].result_count.false_positiv.full)
+                    str(self.reports[index].result_count.false_positive.full)
                 )
 
             # Items anpassen
