@@ -325,7 +325,7 @@ class Ui_MainForm(QWidget):
             item6 = QTableWidgetItem(str(self.reports[index].result_count.info.full))
             item7 = QTableWidgetItem(str(self.reports[index].result_count.log.full))
             item8 = None
-            if self.reports[index].result_count.false_positiv.full is None:
+            if self.reports[index].result_count.false_positive.full is None:
                 item8 = QTableWidgetItem("0")
             else:
                 item8 = QTableWidgetItem(
