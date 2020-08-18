@@ -21,28 +21,13 @@ class Ui_MainForm(QWidget):
         super().__init__()
 
     def handle_start_button_clicked(self, task):
-        # button = self.sender()
-
-        # index = self.table.indexAt(button.pos())
-        # if index.isValid():
-        # print(index.row(),index.column())
-
-        # task = self.tasks[index.row()]
         try:
             print("Start Button clicked" + task.name)
             response = self.gmp.start_task(task.uuid)
         except GvmServerError:
             QMessageBox.about(QMainWindow(), "Error", "Can't start this task.")
-            # print(response)
-
-            # self.load_tasks_ui()
 
     def handle_stop_button_clicked(self, task):
-        # button = self.sender()
-
-        # index = self.table.indexAt(button.pos())
-        # if index.isValid():
-        #    task = self.tasks[index.row()]
         try:
             response = self.gmp.stop_task(task.uuid)
         except GvmServerError:
@@ -67,6 +52,7 @@ class Ui_MainForm(QWidget):
     def load_tasks_ui(self):
         print("Tasks load")
 
+        # Get the data
         response = self.gmp.get_tasks(filter="rows=-1")
         self.tasks = response.tasks
 
@@ -91,8 +77,6 @@ class Ui_MainForm(QWidget):
         self.verticalLayout.addWidget(self.caption_label)
 
         self.table = QtWidgets.QTableWidget()
-
-        # Get the data
 
         self.table.setColumnCount(8)
         self.table.setRowCount(len(response.tasks))
@@ -295,9 +279,8 @@ class Ui_MainForm(QWidget):
             ]
         )
 
-        # Hier kommt die Logik rein
         for index, report in enumerate(reversed(response.reports)):
-            # items erstellen
+            # create items
             item0 = QTableWidgetItem()
             if report.timestamp is not None:
                 date = report.timestamp.strftime("%a, %d. %B %Y %H:%M %Z")
@@ -314,14 +297,6 @@ class Ui_MainForm(QWidget):
                 severity = "N/A"
 
             item3 = QTableWidgetItem(severity)
-
-            """
-            severity mapping:
-                hole    -> hoch
-                warning -> mittel
-                info    -> niedrig
-                log     -> log
-            """
             item4 = QTableWidgetItem(str(report.result_count.hole.full))
             item5 = QTableWidgetItem(str(report.result_count.warning.full))
             item6 = QTableWidgetItem(str(report.result_count.info.full))
