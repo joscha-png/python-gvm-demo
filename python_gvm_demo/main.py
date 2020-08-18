@@ -1,6 +1,7 @@
 import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from functools import partial
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -19,32 +20,33 @@ class Ui_MainForm(QWidget):
     def __init__(self):
         super().__init__()
 
-    def handle_start_button_clicked(self):
-        button = self.sender()
+    def handle_start_button_clicked(self, task):
+        # button = self.sender()
 
-        index = self.table.indexAt(button.pos())
-        if index.isValid():
-            # print(index.row(),index.column())
+        # index = self.table.indexAt(button.pos())
+        # if index.isValid():
+        # print(index.row(),index.column())
 
-            task = self.tasks[index.row()]
-            try:
-                response = self.gmp.start_task(task.uuid)
-            except GvmServerError:
-                QMessageBox.about(QMainWindow(), "Error", "Can't start this task.")
+        # task = self.tasks[index.row()]
+        try:
+            print("Start Button clicked" + task.name)
+            response = self.gmp.start_task(task.uuid)
+        except GvmServerError:
+            QMessageBox.about(QMainWindow(), "Error", "Can't start this task.")
             # print(response)
 
             # self.load_tasks_ui()
 
-    def handle_stop_button_clicked(self):
-        button = self.sender()
+    def handle_stop_button_clicked(self, task):
+        # button = self.sender()
 
-        index = self.table.indexAt(button.pos())
-        if index.isValid():
-            task = self.tasks[index.row()]
-            try:
-                response = self.gmp.stop_task(task.uuid)
-            except GvmServerError:
-                QMessageBox.about(QMainWindow(), "Error", "Can't stop this task.")
+        # index = self.table.indexAt(button.pos())
+        # if index.isValid():
+        #    task = self.tasks[index.row()]
+        try:
+            response = self.gmp.stop_task(task.uuid)
+        except GvmServerError:
+            QMessageBox.about(QMainWindow(), "Error", "Can't stop this task.")
 
     def handle_tasks_button_clicked(self):
         self.timer.stop()
@@ -95,32 +97,32 @@ class Ui_MainForm(QWidget):
         self.table.setColumnCount(8)
         self.table.setRowCount(len(response.tasks))
 
-        for index in range(len(response.tasks)):
-            item0 = QTableWidgetItem(self.tasks[index].name)
-            item1 = QTableWidgetItem(self.tasks[index].status)
+        for index, task in enumerate(response.tasks):
+            item0 = QTableWidgetItem(task.name)
+            item1 = QTableWidgetItem(task.status)
 
-            if self.tasks[index].target.uuid == "":
+            if task.target.uuid == "":
                 item1 = QTableWidgetItem("Container")
 
-            if self.tasks[index].status == "Running":
-                item1 = QTableWidgetItem(str(self.tasks[index].progress) + "%")
-            elif self.tasks[index].status == "Done":
+            if task.status == "Running":
+                item1 = QTableWidgetItem(str(task.progress) + "%")
+            elif task.status == "Done":
                 item1 = QTableWidgetItem("Fertig")
-            elif self.tasks[index].status == "Requested":
+            elif task.status == "Requested":
                 item1 = QTableWidgetItem("Angefragt")
 
-            item2 = QTableWidgetItem(str(self.tasks[index].report_count.current))
+            item2 = QTableWidgetItem(str(task.report_count.current))
 
             report = ""
             severity = ""
-            if self.tasks[index].last_report is not None:
-                if self.tasks[index].last_report.timestamp is not None:
-                    report = self.tasks[index].last_report.timestamp.strftime(
+            if task.last_report is not None:
+                if task.last_report.timestamp is not None:
+                    report = task.last_report.timestamp.strftime(
                         "%a, %d. %B %Y %H:%M %Z"
                     )
                 else:
                     report = ""
-                severity = str(self.tasks[index].last_report.severity.full)
+                severity = str(task.last_report.severity.full)
                 if severity == "-99.0":
                     severity = "N/A"
             else:
@@ -131,19 +133,19 @@ class Ui_MainForm(QWidget):
             item4 = QTableWidgetItem(severity)
 
             trend = ""
-            if self.tasks[index].trend is not None:
-                if self.tasks[index].trend == "same":
+            if task.trend is not None:
+                if task.trend == "same":
                     trend = "➙"
-                elif self.tasks[index].trend == "more":
+                elif task.trend == "more":
                     trend = "➚"
-                elif self.tasks[index].trend == "less":
+                elif task.trend == "less":
                     trend = "➘"
-                elif self.tasks[index].trend == "down":
+                elif task.trend == "down":
                     trend = "↓"
-                elif self.tasks[index].trend == "up":
+                elif task.trend == "up":
                     trend = "↑"
                 else:
-                    trend = self.tasks[index].trend
+                    trend = task.trend
 
             item5 = QTableWidgetItem(trend)
 
@@ -186,12 +188,12 @@ class Ui_MainForm(QWidget):
 
             button = QtWidgets.QPushButton("►")
             button.setStyleSheet("color: white")
-            button.clicked.connect(self.handle_start_button_clicked)
+            button.clicked.connect(partial(self.handle_start_button_clicked, task))
             self.table.setCellWidget(index, 6, button)
 
             button = QtWidgets.QPushButton("▌▌")
             button.setStyleSheet("color: white")
-            button.clicked.connect(self.handle_stop_button_clicked)
+            button.clicked.connect(partial(self.handle_stop_button_clicked, task))
             self.table.setCellWidget(index, 7, button)
 
         header = self.table.horizontalHeader()
@@ -294,20 +296,20 @@ class Ui_MainForm(QWidget):
         )
 
         # Hier kommt die Logik rein
-        for index in reversed(range(len(response.reports))):
+        for index, report in enumerate(reversed(response.reports)):
             # items erstellen
             item0 = QTableWidgetItem()
-            if self.reports[index].timestamp is not None:
-                date = self.reports[index].timestamp.strftime("%a, %d. %B %Y %H:%M %Z")
+            if report.timestamp is not None:
+                date = report.timestamp.strftime("%a, %d. %B %Y %H:%M %Z")
                 item0 = QTableWidgetItem(date)
 
-            item1 = QTableWidgetItem(self.reports[index].task.status)
-            if self.reports[index].task.target.uuid == "":
+            item1 = QTableWidgetItem(report.task.status)
+            if report.task.target.uuid == "":
                 item1 = QTableWidgetItem("Container")
 
-            item2 = QTableWidgetItem(self.reports[index].task.name)
+            item2 = QTableWidgetItem(report.task.name)
 
-            severity = str(self.reports[index].severity.full)
+            severity = str(report.severity.full)
             if severity == "-99.0":
                 severity = "N/A"
 
@@ -320,17 +322,15 @@ class Ui_MainForm(QWidget):
                 info    -> niedrig
                 log     -> log
             """
-            item4 = QTableWidgetItem(str(self.reports[index].result_count.hole.full))
-            item5 = QTableWidgetItem(str(self.reports[index].result_count.warning.full))
-            item6 = QTableWidgetItem(str(self.reports[index].result_count.info.full))
-            item7 = QTableWidgetItem(str(self.reports[index].result_count.log.full))
+            item4 = QTableWidgetItem(str(report.result_count.hole.full))
+            item5 = QTableWidgetItem(str(report.result_count.warning.full))
+            item6 = QTableWidgetItem(str(report.result_count.info.full))
+            item7 = QTableWidgetItem(str(report.result_count.log.full))
             item8 = None
-            if self.reports[index].result_count.false_positive.full is None:
+            if report.result_count.false_positive.full is None:
                 item8 = QTableWidgetItem("0")
             else:
-                item8 = QTableWidgetItem(
-                    str(self.reports[index].result_count.false_positive.full)
-                )
+                item8 = QTableWidgetItem(str(report.result_count.false_positive.full))
 
             # Items anpassen
             item0.setTextAlignment(Qt.AlignCenter)
