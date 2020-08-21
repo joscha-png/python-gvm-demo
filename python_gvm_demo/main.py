@@ -50,8 +50,6 @@ class Ui_MainForm(QWidget):
         self.load_reports_ui()
 
     def load_tasks_ui(self):
-        print("Tasks load")
-
         # Get the data
         response = self.gmp.get_tasks(filter="rows=-1")
         self.tasks = response.tasks
@@ -84,16 +82,19 @@ class Ui_MainForm(QWidget):
         for index, task in enumerate(response.tasks):
             item0 = QTableWidgetItem(task.name)
             item1 = QTableWidgetItem(task.status)
-
             if task.target.uuid == "":
                 item1 = QTableWidgetItem("Container")
-
-            if task.status == "Running":
-                item1 = QTableWidgetItem(str(task.progress) + "%")
-            elif task.status == "Done":
-                item1 = QTableWidgetItem("Fertig")
-            elif task.status == "Requested":
-                item1 = QTableWidgetItem("Angefragt")
+            else:
+                if task.status == "Running":
+                    item1 = QTableWidgetItem(str(task.progress) + "%")
+                elif task.status == "Done":
+                    item1 = QTableWidgetItem("Fertig")
+                elif task.status == "Requested":
+                    item1 = QTableWidgetItem("Angefragt")
+                elif task.status == "Stop Requested":
+                    item1 = QTableWidgetItem("Stopp Angefragt")
+                elif task.status == "Stopped":
+                    item1 = QTableWidgetItem("Angehalten")
 
             item2 = QTableWidgetItem(str(task.report_count.current))
 
@@ -182,7 +183,7 @@ class Ui_MainForm(QWidget):
 
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Fixed)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Fixed)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.Fixed)
@@ -204,8 +205,6 @@ class Ui_MainForm(QWidget):
         self.verticalLayout.addWidget(self.table)
 
     def load_reports_ui(self):
-        print("reports work in progress")
-
         # Get the data
         response = self.gmp.get_reports()  # filter="rows=-1"
         self.reports = response.reports
